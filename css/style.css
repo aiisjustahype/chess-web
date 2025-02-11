@@ -1,0 +1,51 @@
+body {
+  background-color: rgb(232, 160, 100);
+}
+
+.square {
+  width: 80px;
+  height: 80px;
+  border: 1px black solid;
+  background-color: rgb(255, 196, 148);
+}
+
+
+.square-red {
+  width: 80px;
+  height: 80px;
+  border: 1px black solid;
+  background-color: rgb(181, 111, 52);
+}
+
+.topleft {
+  border-radius: 10px 0 0 0;
+}
+
+.topright {
+  border-radius: 0 10px 0 0;
+}
+
+.bottomright {
+  border-radius: 0 0 10px 0;
+}
+
+.bottomleft {
+  border-radius: 0 0 0 10px;
+}
+
+.target-square {
+  background-color: red;
+}
+
+#board {
+  width: 640px;
+  height: 640px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+}
+
+.piece {
+  width: 80px;
+  height: 80px;
+}
