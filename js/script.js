@@ -1,8 +1,48 @@
-import init, { Board } from "../pkg/rust.js";
+import init, { Board, Piece } from "./../pkg/rust.js";
 
 await init();
 let board = new Board();
 let moves = [];
+let promote_move = null;
+let popup = document.getElementById("promote-popup");
+let promote_knight = document.getElementById("promote-knight");
+let promote_bishop = document.getElementById("promote-bishop");
+let promote_rook = document.getElementById("promote-rook");
+let promote_queen = document.getElementById("promote-queen");
+
+window.addEventListener("click", (event) => {
+  if (event.target === popup) {
+    popup.style.display = "none";
+  }
+});
+
+promote_knight.addEventListener("click", () => {
+  promote_move.promote_piece = Piece.KNIGHT;
+  board.make_move(promote_move);
+  popup.style.display = "none";
+  make_board();
+});
+
+promote_bishop.addEventListener("click", () => {
+  promote_move.promote_piece = Piece.BISHOP;
+  board.make_move(promote_move);
+  popup.style.display = "none";
+  make_board();
+});
+
+promote_rook.addEventListener("click", () => {
+  promote_move.promote_piece = Piece.ROOK;
+  board.make_move(promote_move);
+  popup.style.display = "none";
+  make_board();
+});
+
+promote_queen.addEventListener("click", () => {
+  promote_move.promote_piece = Piece.QUEEN;
+  board.make_move(promote_move);
+  popup.style.display = "none";
+  make_board();
+});
 
 function get_style(name) {
   return [...document.styleSheets[0].cssRules].filter(m => m.selectorText == name)[0];
@@ -91,8 +131,13 @@ function square_click(x, y) {
   if (moves.map(m => m.to).includes(square)) {
     for (let i = 0; i < moves.length; i++) {
       if (moves[i].to == square) {
-        board.make_move(moves[i]);
-        break;
+        if (moves[i].promote_piece == Piece.NONE) {
+          board.make_move(moves[i]);
+          break;
+        } else {
+          popup.style.display = "block";
+          promote_move = moves[i];
+        }
       }
     }
     moves = [];
