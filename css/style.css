@@ -43,6 +43,7 @@ body {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
+  margin-bottom: 20px;
 }
 
 .piece {
@@ -71,4 +72,13 @@ body {
   border-radius: 8px;
   width: 300px;
   text-align: center;
+}
+
+button {
+  background-color: rgb(181, 111, 52);
+  border-radius: 10px;
+  width: 100px;
+  height: 40px;
+  border: 2px black solid;
+  color: rgb(255, 196, 148);
 }

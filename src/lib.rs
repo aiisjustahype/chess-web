@@ -536,6 +536,10 @@ impl Board {
         Self::default()
     }
 
+    pub fn get_clone(&self) -> Self {
+        self.clone()
+    }
+
     pub fn fen(&self) -> String {
         let mut rows: Vec<String> = Vec::new();
         for y in (0..8).rev() {
