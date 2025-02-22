@@ -1,0 +1,37 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const __wbg_smove_free: (a: number, b: number) => void;
+export const __wbg_get_smove_from: (a: number) => number;
+export const __wbg_set_smove_from: (a: number, b: number) => void;
+export const __wbg_get_smove_to: (a: number) => number;
+export const __wbg_set_smove_to: (a: number, b: number) => void;
+export const __wbg_get_smove_promote_piece: (a: number) => number;
+export const __wbg_set_smove_promote_piece: (a: number, b: number) => void;
+export const __wbg_get_smove_castle_move: (a: number) => number;
+export const __wbg_set_smove_castle_move: (a: number, b: number) => void;
+export const __wbg_get_smove_ep_move: (a: number) => number;
+export const __wbg_set_smove_ep_move: (a: number, b: number) => void;
+export const __wbg_board_free: (a: number, b: number) => void;
+export const __wbg_get_board_turn: (a: number) => number;
+export const __wbg_set_board_turn: (a: number, b: number) => void;
+export const smove_print: (a: number) => void;
+export const board_new: () => number;
+export const board_get_clone: (a: number) => number;
+export const board_fen: (a: number) => [number, number];
+export const board_all_white_moves: (a: number) => [number, number];
+export const board_all_black_moves: (a: number) => [number, number];
+export const board_white_attacks: (a: number) => bigint;
+export const board_black_attacks: (a: number) => bigint;
+export const board_make_move: (a: number, b: number) => void;
+export const board_print: (a: number) => void;
+export const board_get_rows: (a: number) => [number, number];
+export const board_get_next_boards: (a: number) => [number, number];
+export const board_get_moves: (a: number) => [number, number];
+export const board_get_moves_square: (a: number, b: number) => [number, number];
+export const board_is_checkmate: (a: number) => number;
+export const board_is_stalemate: (a: number) => number;
+export const __wbindgen_export_0: WebAssembly.Table;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
+export const __externref_drop_slice: (a: number, b: number) => void;
+export const __wbindgen_start: () => void;
