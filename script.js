@@ -105,18 +105,18 @@ function make_board() {
       let piece = rows[row][square];
       if (piece != " ") {
         let pic = {
-          "P": "./../assets/white-pawn.png",
-          "p": "./../assets/black-pawn.png",
-          "N": "./../assets/white-knight.png",
-          "n": "./../assets/black-knight.png",
-          "B": "./../assets/white-bishop.png",
-          "b": "./../assets/black-bishop.png",
-          "R": "./../assets/white-rook.png",
-          "r": "./../assets/black-rook.png",
-          "Q": "./../assets/white-queen.png",
-          "q": "./../assets/black-queen.png",
-          "K": "./../assets/white-king.png",
-          "k": "./../assets/black-king.png",
+          "P": "./assets/white-pawn.png",
+          "p": "./assets/black-pawn.png",
+          "N": "./assets/white-knight.png",
+          "n": "./assets/black-knight.png",
+          "B": "./assets/white-bishop.png",
+          "b": "./assets/black-bishop.png",
+          "R": "./assets/white-rook.png",
+          "r": "./assets/black-rook.png",
+          "Q": "./assets/white-queen.png",
+          "q": "./assets/black-queen.png",
+          "K": "./assets/white-king.png",
+          "k": "./assets/black-king.png",
         }[piece];
         let e = document.createElement("img");
         e.src = pic;
