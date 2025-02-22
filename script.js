@@ -1,4 +1,4 @@
-import init, { Board, Piece } from "./../pkg/rust.js";
+import init, { Board, Piece } from "./pkg/rust.js";
 
 await init();
 let board = new Board();
