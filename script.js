@@ -200,4 +200,17 @@ function square_click(x, y) {
   make_board();
 }
 
+let headline = document.getElementById("opennav");
+let sidenav = document.getElementById("sidenav");
+let closebtn = document.getElementById("close-btn");
+let fog = document.getElementById("fog");
+headline.addEventListener("click", () => {
+  sidenav.style.width = "min(40%, 500px)";
+  fog.style.display = "block";
+});
+closebtn.addEventListener("click", () => {
+  sidenav.style.width = "0";
+  fog.style.display = "none";
+})
+
 make_board();
