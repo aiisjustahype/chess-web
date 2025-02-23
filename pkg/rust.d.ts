@@ -1,5 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
+export function get_best_move(board: Board, depth: number): SMove;
 export enum CastleOpt {
   NONE = 0,
   WHITESHORT = 1,
@@ -33,11 +34,18 @@ export class Board {
   print(): void;
   get_rows(): string[];
   get_next_boards(): Board[];
+  get_next_move_boards(): MoveBoardPair[];
   get_moves(): SMove[];
   get_moves_square(square: number): SMove[];
   is_checkmate(): boolean;
   is_stalemate(): boolean;
   turn: Color;
+}
+export class MoveBoardPair {
+  private constructor();
+  free(): void;
+  0: SMove;
+  1: Board;
 }
 export class SMove {
   private constructor();
@@ -69,6 +77,11 @@ export interface InitOutput {
   readonly __wbg_get_board_turn: (a: number) => number;
   readonly __wbg_set_board_turn: (a: number, b: number) => void;
   readonly smove_print: (a: number) => void;
+  readonly __wbg_moveboardpair_free: (a: number, b: number) => void;
+  readonly __wbg_get_moveboardpair_0: (a: number) => number;
+  readonly __wbg_set_moveboardpair_0: (a: number, b: number) => void;
+  readonly __wbg_get_moveboardpair_1: (a: number) => number;
+  readonly __wbg_set_moveboardpair_1: (a: number, b: number) => void;
   readonly board_new: () => number;
   readonly board_get_clone: (a: number) => number;
   readonly board_fen: (a: number) => [number, number];
@@ -80,10 +93,12 @@ export interface InitOutput {
   readonly board_print: (a: number) => void;
   readonly board_get_rows: (a: number) => [number, number];
   readonly board_get_next_boards: (a: number) => [number, number];
+  readonly board_get_next_move_boards: (a: number) => [number, number];
   readonly board_get_moves: (a: number) => [number, number];
   readonly board_get_moves_square: (a: number, b: number) => [number, number];
   readonly board_is_checkmate: (a: number) => number;
   readonly board_is_stalemate: (a: number) => number;
+  readonly get_best_move: (a: number, b: number) => number;
   readonly __wbindgen_export_0: WebAssembly.Table;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __externref_drop_slice: (a: number, b: number) => void;

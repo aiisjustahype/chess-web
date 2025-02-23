@@ -18,6 +18,12 @@ function getStringFromWasm0(ptr, len) {
     return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
 }
 
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+
 let cachedDataViewMemory0 = null;
 
 function getDataViewMemory0() {
@@ -37,12 +43,17 @@ function getArrayJsValueFromWasm0(ptr, len) {
     wasm.__externref_drop_slice(ptr, len);
     return result;
 }
-
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
+/**
+ * @param {Board} board
+ * @param {number} depth
+ * @returns {SMove}
+ */
+export function get_best_move(board, depth) {
+    _assertClass(board, Board);
+    const ret = wasm.get_best_move(board.__wbg_ptr, depth);
+    return SMove.__wrap(ret);
 }
+
 /**
  * @enum {0 | 1 | 2 | 3 | 4}
  */
@@ -201,6 +212,15 @@ export class Board {
         return v1;
     }
     /**
+     * @returns {MoveBoardPair[]}
+     */
+    get_next_move_boards() {
+        const ret = wasm.board_get_next_move_boards(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
      * @returns {SMove[]}
      */
     get_moves() {
@@ -232,6 +252,63 @@ export class Board {
     is_stalemate() {
         const ret = wasm.board_is_stalemate(this.__wbg_ptr);
         return ret !== 0;
+    }
+}
+
+const MoveBoardPairFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_moveboardpair_free(ptr >>> 0, 1));
+
+export class MoveBoardPair {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(MoveBoardPair.prototype);
+        obj.__wbg_ptr = ptr;
+        MoveBoardPairFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        MoveBoardPairFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_moveboardpair_free(ptr, 0);
+    }
+    /**
+     * @returns {SMove}
+     */
+    get 0() {
+        const ret = wasm.__wbg_get_moveboardpair_0(this.__wbg_ptr);
+        return SMove.__wrap(ret);
+    }
+    /**
+     * @param {SMove} arg0
+     */
+    set 0(arg0) {
+        _assertClass(arg0, SMove);
+        var ptr0 = arg0.__destroy_into_raw();
+        wasm.__wbg_set_moveboardpair_0(this.__wbg_ptr, ptr0);
+    }
+    /**
+     * @returns {Board}
+     */
+    get 1() {
+        const ret = wasm.__wbg_get_moveboardpair_1(this.__wbg_ptr);
+        return Board.__wrap(ret);
+    }
+    /**
+     * @param {Board} arg0
+     */
+    set 1(arg0) {
+        _assertClass(arg0, Board);
+        var ptr0 = arg0.__destroy_into_raw();
+        wasm.__wbg_set_moveboardpair_1(this.__wbg_ptr, ptr0);
     }
 }
 
@@ -366,6 +443,10 @@ function __wbg_get_imports() {
     imports.wbg = {};
     imports.wbg.__wbg_board_new = function(arg0) {
         const ret = Board.__wrap(arg0);
+        return ret;
+    };
+    imports.wbg.__wbg_moveboardpair_new = function(arg0) {
+        const ret = MoveBoardPair.__wrap(arg0);
         return ret;
     };
     imports.wbg.__wbg_smove_new = function(arg0) {

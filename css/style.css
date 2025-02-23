@@ -80,7 +80,7 @@ button {
   width: 100px;
   height: 40px;
   border: 2px black solid;
-  color: rgb(255, 196, 148);
+  color: #111;
 }
 
 .sidenav {
@@ -128,4 +128,8 @@ button {
   padding: 0;
   transition: 0.3s;
   z-index: 500;
+}
+
+p {
+  display: inline;
 }

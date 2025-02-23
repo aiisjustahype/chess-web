@@ -1,4 +1,4 @@
-import init, { Board, Piece } from "./pkg/rust.js";
+import init, { Board, Piece, get_best_move } from "./pkg/rust.js";
 
 await init();
 let board = new Board();
@@ -211,6 +211,18 @@ headline.addEventListener("click", () => {
 closebtn.addEventListener("click", () => {
   sidenav.style.width = "0";
   fog.style.display = "none";
+});
+
+let search = document.getElementById("search");
+let depth = document.getElementById("depth");
+let depth_text = document.getElementById("depth-val");
+search.addEventListener("click", () => {
+  let best_move = get_best_move(board, depth.value);
+  play_move(best_move);
+  make_board();
+});
+depth.addEventListener("input", () => {
+  depth_text.textContent = depth.value;
 })
 
 make_board();

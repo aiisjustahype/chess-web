@@ -530,6 +530,9 @@ pub fn print_bitboard(bitboard: u64) {
 }
 
 #[wasm_bindgen]
+pub struct MoveBoardPair(pub SMove, pub Board);
+
+#[wasm_bindgen]
 impl Board {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
@@ -1496,6 +1499,24 @@ impl Board {
         return boards;
     }
 
+    pub fn get_next_move_boards(&self) -> Vec<MoveBoardPair> {
+        let mut boards: Vec<MoveBoardPair> = Vec::new();
+        let moves = match self.turn {
+            Color::WHITE => self.all_white_moves(),
+            Color::BLACK => self.all_black_moves(),
+        };
+
+        for smove in moves {
+            let mut new = *self;
+            new.make_move(smove);
+            if new.is_legal_pos() {
+                boards.push(MoveBoardPair { 0: smove, 1: new });
+            }
+        }
+
+        return boards;
+    }
+
     #[wasm_bindgen]
     pub fn get_moves(&self) -> Vec<SMove> {
         let all = match self.turn {
@@ -1530,3 +1551,5 @@ impl Board {
         !self.is_check(self.turn) && self.get_moves().len() == 0
     }
 }
+
+mod engine;
