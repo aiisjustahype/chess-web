@@ -1,17 +1,72 @@
 use crate::{Board, CastleOpt, Color, Piece, SMove};
 use wasm_bindgen::prelude::*;
 
+const PAWN_SQUARE_RATINGS: [i32; 64] = [
+    90, 90, 90, 90, 90, 90, 90, 90, 130, 130, 130, 130, 130, 130, 130, 130, 120, 120, 120, 120,
+    120, 120, 120, 120, 110, 110, 110, 110, 110, 110, 110, 110, 90, 90, 90, 140, 140, 90, 90, 90,
+    100, 90, 90, 100, 100, 90, 90, 100, 100, 100, 100, 80, 80, 100, 100, 100, 90, 90, 90, 90, 90,
+    90, 90, 90,
+];
+
+const KNIGHT_SQUARE_RATINGS: [i32; 64] = [
+    290, 290, 290, 290, 290, 290, 290, 290, 290, 300, 300, 300, 300, 300, 300, 290, 290, 300, 300,
+    300, 300, 300, 300, 290, 290, 300, 300, 300, 300, 300, 300, 290, 290, 300, 300, 300, 300, 300,
+    300, 290, 290, 300, 310, 300, 300, 310, 300, 290, 290, 300, 300, 310, 310, 300, 300, 290, 290,
+    290, 290, 290, 290, 290, 290, 290,
+];
+
+const BISHOP_SQUARE_RATINGS: [i32; 64] = [
+    300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300,
+    300, 300, 300, 300, 300, 300, 310, 300, 300, 300, 300, 310, 300, 300, 300, 310, 300, 300, 310,
+    300, 300, 300, 300, 300, 310, 310, 300, 300, 300, 300, 310, 300, 310, 310, 300, 310, 300, 300,
+    300, 290, 300, 300, 290, 300, 300,
+];
+
+const ROOK_SQUARE_RATINGS: [i32; 64] = [
+    500, 500, 500, 500, 500, 500, 500, 500, 510, 510, 510, 510, 510, 510, 510, 510, 500, 500, 500,
+    500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500,
+    500, 500, 495, 500, 500, 500, 500, 500, 500, 495, 500, 500, 500, 500, 500, 500, 500, 500, 490,
+    500, 500, 510, 510, 505, 500, 490,
+];
+
+const KING_SQUARE_RATINGS: [i32; 64] = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, -1, -1, -1,
+    0, 0,
+];
+
 fn rate_pos(board: &Board) -> i32 {
-    return board.white_pawns.count_ones() as i32
-        + (board.white_knights.count_ones() * 3) as i32
-        + (board.white_bishops.count_ones() * 3) as i32
-        + (board.white_rooks.count_ones() * 5) as i32
-        + (board.white_queens.count_ones() * 9) as i32
-        - board.black_pawns.count_ones() as i32
-        - (board.black_knights.count_ones() * 3) as i32
-        - (board.black_bishops.count_ones() * 3) as i32
-        - (board.black_rooks.count_ones() * 5) as i32
-        - (board.black_queens.count_ones() * 9) as i32;
+    let mut rating = 0;
+    let pieces = [
+        (board.white_pawns, &PAWN_SQUARE_RATINGS, true),
+        (board.black_pawns, &PAWN_SQUARE_RATINGS, false),
+        (board.white_knights, &KNIGHT_SQUARE_RATINGS, true),
+        (board.black_knights, &KNIGHT_SQUARE_RATINGS, false),
+        (board.white_bishops, &BISHOP_SQUARE_RATINGS, true),
+        (board.black_bishops, &BISHOP_SQUARE_RATINGS, false),
+        (board.white_rooks, &ROOK_SQUARE_RATINGS, true),
+        (board.black_rooks, &ROOK_SQUARE_RATINGS, false),
+        (board.white_kings, &KNIGHT_SQUARE_RATINGS, true),
+        (board.black_kings, &KING_SQUARE_RATINGS, false),
+    ];
+
+    for (piece, rating_table, color) in pieces {
+        let mut other = piece;
+        while other != 0 {
+            let square = other.trailing_zeros();
+            other ^= 1 << square;
+            if color {
+                rating += rating_table[square as usize];
+            } else {
+                rating -= rating_table[63 - square as usize];
+            }
+        }
+    }
+
+    rating += (board.white_queens.count_ones() * 900) as i32;
+    rating -= (board.black_queens.count_ones() * 900) as i32;
+
+    return rating;
 }
 
 fn alpha_beta(board: &Board, depth: i32, _alpha: i32, _beta: i32) -> i32 {
