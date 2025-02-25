@@ -112,8 +112,32 @@ fn alpha_beta(board: &Board, depth: i32, _alpha: i32, _beta: i32) -> i32 {
         return quiescence_search(board, alpha, _beta);
     }
 
+    let mut other_moves: Vec<Board> = Vec::new();
     let mut best = i32::MIN;
-    for b in board.get_next_boards() {
+    for pair in board.get_next_move_boards() {
+        if pair.0.ep_move
+            || match board.get_piece_at(pair.0.to) {
+                (Piece::NONE, Color::WHITE) => false,
+                (Piece::NONE, Color::BLACK) => false,
+                _ => true,
+            }
+        {
+            let rating = -alpha_beta(&pair.1, depth - 1, -_beta, -alpha);
+            if rating > best {
+                best = rating;
+                if rating > _alpha {
+                    alpha = rating;
+                }
+            }
+            if rating >= _beta {
+                return best;
+            }
+        } else {
+            other_moves.push(pair.1);
+        }
+    }
+
+    for b in other_moves {
         let rating = -alpha_beta(&b, depth - 1, -_beta, -alpha);
         if rating > best {
             best = rating;
