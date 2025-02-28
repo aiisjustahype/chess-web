@@ -133,7 +133,7 @@ function play_move(m) {
   if (board_i != boards.length - 1) {
     boards = boards.slice(0, board_i + 1);
   }
-  board.make_move(m);
+  board.play(m);
   boards.push(board.get_clone());
   board_i += 1;
 }

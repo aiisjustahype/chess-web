@@ -229,6 +229,14 @@ enum Dir {
     SW,
 }
 
+#[derive(Clone, Copy, PartialEq)]
+enum Outcome {
+    ONGOING,
+    WHITE,
+    BLACK,
+    DRAW,
+}
+
 struct Move {
     pub from: u64,
     pub to: u64,
@@ -270,6 +278,9 @@ pub struct Board {
     last_pos_ep: u64,
     black_occupied: u64,
     white_occupied: u64,
+    previous_positions: [[u64; 12]; 100],
+    next_index: usize,
+    outcome: Outcome,
 }
 
 #[wasm_bindgen]
@@ -374,6 +385,9 @@ impl Default for Board {
             last_pos_ep: 0,
             black_occupied: 0,
             white_occupied: 0,
+            previous_positions: [[0; 12]; 100],
+            next_index: 0,
+            outcome: Outcome::ONGOING,
         };
 
         board.white_occupied = board._white_occupied();
@@ -728,9 +742,13 @@ impl Board {
 
         let path: u64 = get_ray(&change)[square.trailing_zeros() as usize];
         let occupied = path & all_occupied;
-        let nearest = match change {
-            Dir::S | Dir::SE | Dir::SW | Dir::E => 63 - occupied.leading_zeros(),
-            Dir::N | Dir::NE | Dir::NW | Dir::W => occupied.trailing_zeros(),
+        let nearest = if occupied == 0 {
+            0
+        } else {
+            match change {
+                Dir::S | Dir::SE | Dir::SW | Dir::E => 63 - occupied.leading_zeros(),
+                Dir::N | Dir::NE | Dir::NW | Dir::W => occupied.trailing_zeros(),
+            }
         };
         return if nearest >= 64 {
             path & !self.white_occupied
@@ -745,9 +763,13 @@ impl Board {
 
         let path: u64 = get_ray(&change)[square.trailing_zeros() as usize];
         let occupied = path & all_occupied;
-        let nearest = match change {
-            Dir::S | Dir::SE | Dir::SW | Dir::E => 63 - occupied.leading_zeros(),
-            Dir::N | Dir::NE | Dir::NW | Dir::W => occupied.trailing_zeros(),
+        let nearest = if occupied == 0 {
+            0
+        } else {
+            match change {
+                Dir::S | Dir::SE | Dir::SW | Dir::E => 63 - occupied.leading_zeros(),
+                Dir::N | Dir::NE | Dir::NW | Dir::W => occupied.trailing_zeros(),
+            }
         };
         return if nearest >= 64 {
             path & !self.black_occupied
@@ -1124,6 +1146,9 @@ impl Board {
     }
 
     pub fn all_white_moves(&self) -> Vec<SMove> {
+        if self.outcome != Outcome::ONGOING {
+            return Vec::new();
+        }
         let moves = self._all_white_moves(true);
         let mut smoves: Vec<SMove> = Vec::new();
 
@@ -1137,6 +1162,9 @@ impl Board {
     }
 
     pub fn all_black_moves(&self) -> Vec<SMove> {
+        if self.outcome != Outcome::ONGOING {
+            return Vec::new();
+        }
         let moves = self._all_black_moves(true);
         let mut smoves: Vec<SMove> = Vec::new();
 
@@ -1374,9 +1402,7 @@ impl Board {
                             self.castle_black_long = false;
                         }
                     }
-                }
-
-                if piece == Piece::ROOK {
+                } else if piece == Piece::ROOK {
                     match color {
                         Color::WHITE => {
                             if smove.from == 0 {
@@ -1393,9 +1419,8 @@ impl Board {
                             }
                         }
                     }
-                }
-
-                if piece == Piece::PAWN {
+                } else if piece == Piece::PAWN {
+                    self.reset_fifty_move_rule();
                     let to_square: u64 = 1 << smove.to;
                     let from_square: u64 = 1 << smove.from;
                     if (color == Color::WHITE
@@ -1409,6 +1434,7 @@ impl Board {
                     }
                 }
             } else {
+                self.reset_fifty_move_rule();
                 self.set_none(smove.from);
                 self.set_new_piece(smove.to, smove.promote_piece, self.turn);
             }
@@ -1425,6 +1451,12 @@ impl Board {
             }
             if to == H8 {
                 self.castle_black_short = false;
+            }
+
+            match self.get_piece_at(smove.to) {
+                (Piece::NONE, Color::WHITE) => self.reset_fifty_move_rule(),
+                (Piece::NONE, Color::BLACK) => self.reset_fifty_move_rule(),
+                _ => {}
             }
         }
         self.turn = match self.turn {
@@ -1444,6 +1476,38 @@ impl Board {
 
         self.black_occupied = self._black_occupied();
         self.white_occupied = self._white_occupied();
+    }
+
+    pub fn play(&mut self, smove: SMove) {
+        self.make_move(smove);
+        if self.next_index < 100 {
+            self.previous_positions[self.next_index] = self.get_pos();
+            self.next_index += 1;
+        }
+
+        if self.get_moves().len() == 0 {
+            self.outcome = if self.is_check(self.turn) {
+                match self.turn {
+                    Color::WHITE => Outcome::BLACK,
+                    Color::BLACK => Outcome::WHITE,
+                }
+            } else {
+                Outcome::DRAW
+            }
+        }
+        if self.is_threefold_rep() {
+            self.outcome = Outcome::DRAW;
+        }
+
+        if self.next_index >= 100 {
+            self.outcome = Outcome::DRAW;
+            self.next_index = 0;
+        }
+    }
+
+    fn reset_fifty_move_rule(&mut self) {
+        self.next_index = 0;
+        self.previous_positions = [[0; 12]; 100];
     }
 
     pub fn print(&self) {
@@ -1525,7 +1589,7 @@ impl Board {
         };
         let mut legal: Vec<SMove> = Vec::new();
         for smove in all {
-            let mut new = *self;
+            let mut new = self.clone();
             new.make_move(smove);
             if new.is_legal_pos() {
                 legal.push(smove);
@@ -1548,7 +1612,38 @@ impl Board {
     }
 
     pub fn is_stalemate(&self) -> bool {
-        !self.is_check(self.turn) && self.get_moves().len() == 0
+        !(self.is_check(self.turn)) && self.get_moves().len() == 0
+    }
+
+    fn get_pos(&self) -> [u64; 12] {
+        [
+            self.white_pawns,
+            self.white_knights,
+            self.white_bishops,
+            self.white_rooks,
+            self.white_queens,
+            self.white_kings,
+            self.black_pawns,
+            self.black_knights,
+            self.black_bishops,
+            self.black_rooks,
+            self.black_queens,
+            self.black_kings,
+        ]
+    }
+
+    pub fn is_threefold_rep(&self) -> bool {
+        let now = self.get_pos();
+        let mut count = 0;
+        for pos in self.previous_positions {
+            if pos == now {
+                count += 1;
+                if count >= 3 {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
 

@@ -31,6 +31,7 @@ export class Board {
   white_attacks(): bigint;
   black_attacks(): bigint;
   make_move(smove: SMove): void;
+  play(smove: SMove): void;
   print(): void;
   get_rows(): string[];
   get_next_boards(): Board[];
@@ -39,6 +40,7 @@ export class Board {
   get_moves_square(square: number): SMove[];
   is_checkmate(): boolean;
   is_stalemate(): boolean;
+  is_threefold_rep(): boolean;
   turn: Color;
 }
 export class MoveBoardPair {
@@ -90,6 +92,7 @@ export interface InitOutput {
   readonly board_white_attacks: (a: number) => bigint;
   readonly board_black_attacks: (a: number) => bigint;
   readonly board_make_move: (a: number, b: number) => void;
+  readonly board_play: (a: number, b: number) => void;
   readonly board_print: (a: number) => void;
   readonly board_get_rows: (a: number) => [number, number];
   readonly board_get_next_boards: (a: number) => [number, number];
@@ -98,6 +101,7 @@ export interface InitOutput {
   readonly board_get_moves_square: (a: number, b: number) => [number, number];
   readonly board_is_checkmate: (a: number) => number;
   readonly board_is_stalemate: (a: number) => number;
+  readonly board_is_threefold_rep: (a: number) => number;
   readonly get_best_move: (a: number, b: number) => number;
   readonly __wbindgen_export_0: WebAssembly.Table;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;

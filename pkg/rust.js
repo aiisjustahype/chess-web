@@ -190,6 +190,14 @@ export class Board {
         var ptr0 = smove.__destroy_into_raw();
         wasm.board_make_move(this.__wbg_ptr, ptr0);
     }
+    /**
+     * @param {SMove} smove
+     */
+    play(smove) {
+        _assertClass(smove, SMove);
+        var ptr0 = smove.__destroy_into_raw();
+        wasm.board_play(this.__wbg_ptr, ptr0);
+    }
     print() {
         wasm.board_print(this.__wbg_ptr);
     }
@@ -251,6 +259,13 @@ export class Board {
      */
     is_stalemate() {
         const ret = wasm.board_is_stalemate(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    is_threefold_rep() {
+        const ret = wasm.board_is_threefold_rep(this.__wbg_ptr);
         return ret !== 0;
     }
 }
