@@ -190,14 +190,6 @@ export class Board {
         var ptr0 = smove.__destroy_into_raw();
         wasm.board_make_move(this.__wbg_ptr, ptr0);
     }
-    /**
-     * @param {SMove} smove
-     */
-    play(smove) {
-        _assertClass(smove, SMove);
-        var ptr0 = smove.__destroy_into_raw();
-        wasm.board_play(this.__wbg_ptr, ptr0);
-    }
     print() {
         wasm.board_print(this.__wbg_ptr);
     }
@@ -227,6 +219,13 @@ export class Board {
         var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
+    }
+    /**
+     * @returns {boolean}
+     */
+    has_moves() {
+        const ret = wasm.board_has_moves(this.__wbg_ptr);
+        return ret !== 0;
     }
     /**
      * @returns {SMove[]}

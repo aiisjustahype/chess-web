@@ -232,8 +232,6 @@ enum Dir {
 #[derive(Clone, Copy, PartialEq)]
 enum Outcome {
     ONGOING,
-    WHITE,
-    BLACK,
     DRAW,
 }
 
@@ -1359,7 +1357,6 @@ impl Board {
 
     #[wasm_bindgen]
     pub fn make_move(&mut self, smove: SMove) {
-        let before = *self;
         self.last_pos_ep = 0;
         if smove.castle_move != CastleOpt::NONE {
             self.make_castle_move(smove);
@@ -1465,36 +1462,17 @@ impl Board {
         };
 
         if self.white_kings.count_ones() != 1 || self.black_kings.count_ones() != 1 {
-            println!("a king dissappeared:");
-            before.print();
-            print!("\n");
-            smove.print();
-            print!("\n");
-            self.print();
             panic!()
         }
 
         self.black_occupied = self._black_occupied();
         self.white_occupied = self._white_occupied();
-    }
 
-    pub fn play(&mut self, smove: SMove) {
-        self.make_move(smove);
         if self.next_index < 100 {
             self.previous_positions[self.next_index] = self.get_pos();
             self.next_index += 1;
         }
 
-        if self.get_moves().len() == 0 {
-            self.outcome = if self.is_check(self.turn) {
-                match self.turn {
-                    Color::WHITE => Outcome::BLACK,
-                    Color::BLACK => Outcome::WHITE,
-                }
-            } else {
-                Outcome::DRAW
-            }
-        }
         if self.is_threefold_rep() {
             self.outcome = Outcome::DRAW;
         }
@@ -1581,12 +1559,27 @@ impl Board {
         return boards;
     }
 
-    #[wasm_bindgen]
-    pub fn get_moves(&self) -> Vec<SMove> {
-        let all = match self.turn {
+    fn get_all_moves(&self) -> Vec<SMove> {
+        match self.turn {
             Color::WHITE => self.all_white_moves(),
             Color::BLACK => self.all_black_moves(),
-        };
+        }
+    }
+
+    pub fn has_moves(&self) -> bool {
+        for m in self.get_all_moves() {
+            let mut new = *self;
+            new.make_move(m);
+            if new.is_legal_pos() {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    #[wasm_bindgen]
+    pub fn get_moves(&self) -> Vec<SMove> {
+        let all = self.get_all_moves();
         let mut legal: Vec<SMove> = Vec::new();
         for smove in all {
             let mut new = self.clone();
@@ -1633,9 +1626,10 @@ impl Board {
     }
 
     pub fn is_threefold_rep(&self) -> bool {
-        let now = self.get_pos();
+        let now = &self.get_pos();
         let mut count = 0;
-        for pos in self.previous_positions {
+        for i in 0..=self.next_index {
+            let pos = &self.previous_positions[i];
             if pos == now {
                 count += 1;
                 if count >= 3 {

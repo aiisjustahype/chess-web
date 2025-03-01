@@ -31,11 +31,11 @@ export class Board {
   white_attacks(): bigint;
   black_attacks(): bigint;
   make_move(smove: SMove): void;
-  play(smove: SMove): void;
   print(): void;
   get_rows(): string[];
   get_next_boards(): Board[];
   get_next_move_boards(): MoveBoardPair[];
+  has_moves(): boolean;
   get_moves(): SMove[];
   get_moves_square(square: number): SMove[];
   is_checkmate(): boolean;
@@ -92,11 +92,11 @@ export interface InitOutput {
   readonly board_white_attacks: (a: number) => bigint;
   readonly board_black_attacks: (a: number) => bigint;
   readonly board_make_move: (a: number, b: number) => void;
-  readonly board_play: (a: number, b: number) => void;
   readonly board_print: (a: number) => void;
   readonly board_get_rows: (a: number) => [number, number];
   readonly board_get_next_boards: (a: number) => [number, number];
   readonly board_get_next_move_boards: (a: number) => [number, number];
+  readonly board_has_moves: (a: number) => number;
   readonly board_get_moves: (a: number) => [number, number];
   readonly board_get_moves_square: (a: number, b: number) => [number, number];
   readonly board_is_checkmate: (a: number) => number;
